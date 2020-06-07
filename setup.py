@@ -22,6 +22,7 @@ setuptools.setup(
     install_requires=[
         'ijson>=3.0.4,<4',
     ],
+    test_suite='tests',
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
