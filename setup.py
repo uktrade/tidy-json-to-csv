@@ -18,7 +18,7 @@ setuptools.setup(
     py_modules=[
         'tidy_json_to_csv',
     ],
-    python_requires='>=3.5.0',
+    python_requires='>=3.6.3',
     install_requires=[
         'ijson>=3.0.4,<4',
     ],
