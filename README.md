@@ -23,7 +23,7 @@ def save_csv_bytes(path):
         pass
 
 # Overkill for this example, but shows how a generator can be
-# used to generate the bytes of a JSON file
+# used to generate the bytes of a large JSON file
 def json_bytes():
     with open(f'file.json', 'rb') as f:
         yield f.read()
