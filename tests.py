@@ -22,10 +22,6 @@ class TestIntegration(unittest.TestCase):
             path: b''.join(contents)
             for path, contents in total_received.items()
         }
-        self.assertEqual(set(files.keys()), set([
-            'songs[*]', 'songs[*].categories[*]', 'songs[*].categories[*].id',
-            'songs[*].comments[*]',
-        ]))
         self.assertEqual(files, json_bytes_songs_parsed)
 
 
@@ -59,7 +55,7 @@ json_bytes_songs = b'''{
 
 json_bytes_songs_parsed = {
     'songs[*].categories[*].id': b'\xef\xbb\xbf"songs.id","categories.id"\r\n"1","1"\r\n"1","2"\r\n"2","1"\r\n"2","3"\r\n',
-    'songs[*].categories[*]': b'\xef\xbb\xbf"id","name"\r\n"1","musicals"\r\n"2","television-shows"\r\n"3","films"\r\n',
     'songs[*].comments[*]': b'\xef\xbb\xbf"songs.id","content"\r\n"1","I love it"\r\n"1","I\'ve heard better"\r\n"2","I also could have danced all night"\r\n',
     'songs[*]': b'\xef\xbb\xbf"id","title"\r\n"1","Walk through the fire"\r\n"2","I could have danced all night"\r\n',
+    'categories[*]': b'\xef\xbb\xbf"id","name"\r\n"1","musicals"\r\n"2","television-shows"\r\n"3","films"\r\n',
 }

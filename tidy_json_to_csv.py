@@ -58,7 +58,7 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA'):
 
         # ... and if top level, but not yet saved it, save it
         if is_top_level and open_maps[prefix]['id'] not in top_level_saved[key]:
-            save(to_path(prefix), open_maps[prefix])
+            save(f'{key}[*]', open_maps[prefix])
             top_level_saved[key].add(open_maps[prefix]['id'])
 
         # We're going to be moving up a level, so no need for last ID
