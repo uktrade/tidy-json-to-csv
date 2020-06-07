@@ -43,7 +43,7 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA'):
 
         # IDs of parents so the user can do JOINs
         parent_id_dict = {
-            f'{parent_key}.id': parent_id
+            f'{parent_key}__id': parent_id
             for (parent_key, parent_id) in parent_ids
         }
 

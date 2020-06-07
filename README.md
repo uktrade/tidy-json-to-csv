@@ -84,7 +84,7 @@ maps to four files:
 ### `songs[*].categories[*].id.csv`
 
 ```csv
-"songs.id","categories.id"
+"songs__id","categories__id"
 "1","1"
 "1","2"
 "2","1"
@@ -94,7 +94,7 @@ maps to four files:
 ### `songs[*].comments[*].csv`
 
 ```csv
-"songs.id","name"
+"songs__id","name"
 "1","I love it"
 "1","I've heard better"
 "2","I also could have danced all night"
