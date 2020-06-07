@@ -1,6 +1,8 @@
 # tidy-json-to-csv
 
-Convert a subset of JSON to a set of tidy CSVs. Supports both streaming processing of input JSON and output of CSV, and so suitable for large files in memory constrained environments.
+Converts a subset of JSON to a set of tidy CSVs. Supports both streaming processing of input JSON and output of CSV, and so suitable for large files in memory constrained environments.
+
+Denormalised input JSON is assumed, and the output is normalised. If a nested object has an `id` field, it is assumed to be the primary key of a separate table. All objects that have a nested object or array _must_ have an `id` field that serves as its primary key in the final output.
 
 > Work in progress. This README serves as a rough design spec.
 
@@ -41,23 +43,30 @@ The JSON
       "id": "1",
       "title": "Walk through the fire",
       "categories": [
-        {"name": "musicals"},
-        {"name": "television-shows"}
+        {"id": "1", "name": "musicals"},
+        {"id": "2", "name": "television-shows"}
+      ],
+      "comments": [
+        {"content": "I love it"},
+        {"content": "I've heard better"}
       ]
     },
     {
       "id": "2",
       "title": "I could have danced all night",
       "categories": [
-        {"name": "musicals"},
-        {"name": "films"}
+        {"id": "1", "name": "musicals"},
+        {"id": "3", "name": "films"}
+      ],
+      "comments": [
+        {"content": "I also could have danced all night"}
       ]
     }
   ]
 }
 ```
 
-maps to two files, `songs[*].csv` and `songs[*].categories[*].csv`
+maps to four files:
 
 ### `songs[*].csv`
 
@@ -67,12 +76,30 @@ maps to two files, `songs[*].csv` and `songs[*].categories[*].csv`
 "2","I could have danced all night"
 ```
 
-### `songs[*].categories[*].csv`
+### `songs[*].categories[*].id.csv`
+
+```csv
+"songs.id","categories.id"
+"1","1"
+"1","2"
+"2","1"
+"2","3"
+```
+
+### `categories[*].csv`
+
+```csv
+"id","name"
+"1","musicals"
+"2","television-shows"
+"3","films"
+```
+
+### `songs[*].comments[*].csv`
 
 ```csv
 "songs.id","name"
-"1","musicals"
-"1","television-shows"
-"2","musicals"
-"2","films"
+"1","I love it"
+"1","I've heard better"
+"2","I also could have danced all night"
 ```
