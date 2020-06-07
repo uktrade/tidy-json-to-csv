@@ -1,4 +1,4 @@
-# tidy-json-to-csv
+# tidy-json-to-csv [![CircleCI](https://circleci.com/gh/uktrade/tidy-json-to-csv.svg?style=svg)](https://circleci.com/gh/uktrade/tidy-json-to-csv)
 
 Converts a subset of JSON to a set of tidy CSVs. Supports both streaming processing of input JSON and output of CSV, and so suitable for large files in memory constrained environments.
 
