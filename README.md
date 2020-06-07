@@ -7,6 +7,13 @@ Denormalised input JSON is assumed, and the output is normalised. If a nested ob
 Although _mostly_ streaming, to support denormalised input JSON and to avoid repeating the same rows in normalised CSVs, an internal record of output IDs is maintained during processing.
 
 
+## Installation
+
+```bash
+pip install tidy-json-to-csv
+```
+
+
 ## Usage
 
 ```python
