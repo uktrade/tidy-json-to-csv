@@ -94,7 +94,7 @@ maps to four files:
 ### `songs[*].comments[*].csv`
 
 ```csv
-"songs__id","name"
+"songs__id","content"
 "1","I love it"
 "1","I've heard better"
 "2","I also could have danced all night"
