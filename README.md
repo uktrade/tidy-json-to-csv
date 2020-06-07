@@ -86,15 +86,6 @@ maps to four files:
 "2","3"
 ```
 
-### `categories[*].csv`
-
-```csv
-"id","name"
-"1","musicals"
-"2","television-shows"
-"3","films"
-```
-
 ### `songs[*].comments[*].csv`
 
 ```csv
@@ -102,4 +93,13 @@ maps to four files:
 "1","I love it"
 "1","I've heard better"
 "2","I also could have danced all night"
+```
+
+### `categories[*].csv`
+
+```csv
+"id","name"
+"1","musicals"
+"2","television-shows"
+"3","films"
 ```
