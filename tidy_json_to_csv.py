@@ -6,7 +6,6 @@ import ijson
 
 
 def to_csvs(json_bytes, save_csv_bytes, null='#NA'):
-    top_level_maps = {}
     top_level_saved = defaultdict(set)
     open_maps = {}
     parent_ids = []
