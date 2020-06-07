@@ -72,7 +72,7 @@ maps to two files, `songs[*].csv` and `songs[*].categories[*].csv`
 ```csv
 "songs.id","name"
 "1","musicals"
-"1","television-songs"
+"1","television-shows"
 "2","musicals"
 "2","films"
 ```
