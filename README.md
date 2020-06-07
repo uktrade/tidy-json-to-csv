@@ -2,7 +2,7 @@
 
 Converts a subset of JSON to a set of tidy CSVs. Supports both streaming processing of input JSON and output of CSV, and so suitable for large files in memory constrained environments.
 
-Denormalised input JSON is assumed, and the output is normalised. If a nested object has an `id` field, it is assumed to be the primary key of a top-level table. All objects that have a nested object or array _must_ have an `id` field that serves as its primary key in the final output.
+Denormalised input JSON is assumed, and the output is normalised. If a nested object has an `id` field, it is assumed to be the primary key of a top-level table. All objects that have a nested object or array _must_ have an `id` field that serves as its primary key in the final output. If present, `id` must be the _first_ key in a map. All arrays must be arrays of objects rather than primitives.
 
 Although _mostly_ streaming, to support denormalised input JSON and to avoid repeating the same rows in normalised CSVs, an internal record of output IDs is maintained during processing.
 
@@ -17,12 +17,10 @@ from tidy_json_to_csv import to_csvs
 # A save generator must be provided since a single JSON file
 # maps to multiple CSVs
 def save_csv_bytes(path):
-    try:
-        with open(f'{path}.csv', 'wb') as f:
-            while True:
-                f.write(yield)
-    except GeneratorExit:
-        pass
+    with open(f'{path}.csv', 'wb') as f:
+        while True:
+            chunk = yield
+            f.write(chunk)
 
 # Overkill for this example, but shows how a generator can be
 # used to generate the bytes of a large JSON file
