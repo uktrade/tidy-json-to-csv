@@ -2,7 +2,7 @@
 
 Converts a subset of JSON to a set of tidy CSVs. Supports both streaming processing of input JSON and output of CSV, and so suitable for large files in memory constrained environments.
 
-Denormalised input JSON is assumed, and the output is normalised. If a nested object has an `id` field, it is assumed to be the primary key of a separate table. All objects that have a nested object or array _must_ have an `id` field that serves as its primary key in the final output.
+Denormalised input JSON is assumed, and the output is normalised. If a nested object has an `id` field, it is assumed to be the primary key of a separate top-level table. All objects that have a nested object or array _must_ have an `id` field that serves as its primary key in the final output.
 
 > Work in progress. This README serves as a rough design spec.
 
