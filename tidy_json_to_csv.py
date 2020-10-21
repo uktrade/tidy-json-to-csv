@@ -24,7 +24,6 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA'):
             gen = save_csv_bytes(path)
             open_csv_gens[path] = gen
             next(gen)
-            gen.send(codecs.BOM_UTF8)
             gen.send(csv_writer.writerow(dict_data.keys()).encode('utf-8'))
 
         gen.send(csv_writer.writerow(dict_data.values()).encode('utf-8'))
