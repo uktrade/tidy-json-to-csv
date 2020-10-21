@@ -54,7 +54,10 @@ The JSON
       "comments": [
         {"content": "I love it"},
         {"content": "I've heard better"}
-      ]
+      ],
+      "artist": {
+        "name": "Slayer"
+      }
     },
     {
       "id": "2",
@@ -65,7 +68,10 @@ The JSON
       ],
       "comments": [
         {"content": "I also could have danced all night"}
-      ]
+      ],
+      "artist": {
+        "name": "Doolitle"
+      }
     }
   ]
 }
@@ -76,9 +82,9 @@ maps to four files:
 ### `songs[*].csv`
 
 ```csv
-"id","title"
-"1","Walk through the fire"
-"2","I could have danced all night"
+"id","title","artist__name"
+"1","Walk through the fire","Slayer"
+"2","I could have danced all night","Doolitle"
 ```
 
 ### `songs[*].categories[*].id.csv`
