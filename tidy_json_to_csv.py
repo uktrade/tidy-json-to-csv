@@ -89,17 +89,13 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA'):
         parent, _, key = prefix.rpartition('.')
         open_maps[parent][key] = value
 
-    def handle_integer(prefix, value):
-        parent, _, key = prefix.rpartition('.')
-        open_maps[parent][key] = value
-
-    def handle_double(prefix, value):
-        parent, _, key = prefix.rpartition('.')
-        open_maps[parent][key] = value
-
     def handle_number(prefix, value):
         parent, _, key = prefix.rpartition('.')
         open_maps[parent][key] = value
+
+        if key == 'id':
+            parent_key = prefix.rpartition('.item.')[0].rpartition('.item.')[2]
+            parent_ids.append((parent_key, value))
 
     def handle_string(prefix, value):
         parent, _, key = prefix.rpartition('.')
