@@ -3,13 +3,16 @@ import codecs
 import csv
 import re
 import ijson
+import queue
+import threading
 
 
 def to_csvs(json_bytes, save_csv_bytes, null='#NA'):
+    STOP_SENTINAL = object()
     top_level_saved = defaultdict(set)
     open_maps = {}
     parent_ids = []
-    open_csv_gens = {}
+    open_csv_qs = {}
 
     class PseudoBuffer:
         def write(self, value):
@@ -17,16 +20,31 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA'):
 
     csv_writer = csv.writer(PseudoBuffer(), quoting=csv.QUOTE_NONNUMERIC)
 
+    class QueuedIterable():
+        def __init__(self, q):
+            self.q = q
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            item = self.q.get()
+            self.q.task_done()
+            if item is STOP_SENTINAL:
+                raise StopIteration()
+            return item
+
     def save(path, dict_data):
         try:
-            gen = open_csv_gens[path]
+            _, q = open_csv_qs[path]
         except KeyError:
-            gen = save_csv_bytes(path)
-            open_csv_gens[path] = gen
-            next(gen)
-            gen.send(csv_writer.writerow(dict_data.keys()).encode('utf-8'))
+            q = queue.Queue(maxsize=1)
+            t = threading.Thread(target=save_csv_bytes, args=(path, QueuedIterable(q)))
+            t.start()
+            open_csv_qs[path] = (t, q)
+            q.put(csv_writer.writerow(dict_data.keys()).encode('utf-8'))
 
-        gen.send(csv_writer.writerow(dict_data.values()).encode('utf-8'))
+        q.put(csv_writer.writerow(dict_data.values()).encode('utf-8'))
 
     def to_path(prefix):
         return re.sub(r'([^.]+)\.item', r'\1[*]', prefix)
@@ -124,8 +142,8 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA'):
 
     # Close all open CSVs
     finally:
-        for gen in open_csv_gens:
-            try:
-                gen.close()
-            except:
-                pass
+        for _, q in open_csv_qs.values():
+            q.put(STOP_SENTINAL)
+
+        for t, q in open_csv_qs.values():
+            t.join()

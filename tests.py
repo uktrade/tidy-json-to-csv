@@ -11,11 +11,10 @@ class TestIntegration(unittest.TestCase):
         def json_bytes():
             yield json_bytes_songs
 
-        def save_csv(path):
+        def save_csv(path, chunks):
             total_received[path] = []
-            while True:
-                bytes_chunked = yield
-                total_received[path].append(bytes_chunked)
+            for chunk in chunks:
+                total_received[path].append(chunk)
 
         to_csvs(json_bytes(), save_csv)
         files = {
