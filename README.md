@@ -13,7 +13,7 @@ Most JSON to CSV converters do not result in data suitable for immediate analysi
 
 - JSON inside CSV fields;
 - values in lists presented as columms;
-- duplicate rows / a row's position in the CSV determines its context.
+- data duplicated in multiple rows / a row's position in the CSV determines its context.
 
 Often these require subsequent manual, and so error-prone, data manipulation. This library aims to do all the conversion up-front, so you end up with a set of [tidy](https://vita.had.co.nz/papers/tidy-data.pdf) tables, which is often a great place from which to start analysis.
 
