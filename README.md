@@ -9,7 +9,13 @@ Although _mostly_ streaming, to support denormalised input JSON and to avoid rep
 
 ## What problem does this solve?
 
-Most JSON to CSV converters don't fully convert to CSV: nested stuctures typically remain as JSON. Before actually performing analysis, more JSON to CSV conversions are required on each field. This library aims to do all the conversions up-front, so you end up with a set of [tidy](https://vita.had.co.nz/papers/tidy-data.pdf) tables.
+Most JSON to CSV converters do not result in data suitable for immediate analysis. They usually output a single CSV, and to do this, result in some combination of:
+
+- JSON inside CSV fields;
+- values in lists presented as columms;
+- duplicate rows / a row's position in the CSV determines its context.
+
+Often these require subsequent manual, and so error-prone, data manipulation. This library aims to do all the conversion up-front, so you end up with a set of [tidy](https://vita.had.co.nz/papers/tidy-data.pdf) tables, which is often a great place from which to start analysis.
 
 
 ## Example input and output
