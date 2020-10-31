@@ -169,7 +169,7 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536):
         for _, q in open_csv_qs.values():
             q.put(STOP_SENTINAL)
 
-        for t, q in open_csv_qs.values():
+        for t, _ in open_csv_qs.values():
             t.join()
 
 
