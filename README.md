@@ -7,6 +7,11 @@ Denormalised input JSON is assumed, and the output is normalised. If a nested ob
 Although _mostly_ streaming, to support denormalised input JSON and to avoid repeating the same rows in normalised CSVs, an internal record of output IDs is maintained during processing.
 
 
+## What problem does this solve?
+
+Most JSON to CSV converters don't fully convert to CSV: nested stuctures typically remain as JSON. Before actually performing analysis, more JSON to CSV conversions are required on each field. This library aims to do all the conversions up-front, so you end up with a set of [tidy](https://vita.had.co.nz/papers/tidy-data.pdf) tables.
+
+
 ## Example input and output
 
 The JSON
