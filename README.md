@@ -14,7 +14,14 @@ pip install tidy-json-to-csv
 ```
 
 
-## Usage
+## Usage: Command line
+
+```bash
+cat songs.json | tidy_json_to_csv
+```
+
+
+## Usage: Python
 
 ```python
 from tidy_json_to_csv import to_csvs

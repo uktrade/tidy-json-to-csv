@@ -22,6 +22,11 @@ setuptools.setup(
     install_requires=[
         'ijson>=3.0.4,<4',
     ],
+    entry_points={
+        'console_scripts': [
+            'tidy_json_to_csv=tidy_json_to_csv:main'
+        ],
+    },
     test_suite='tests',
     classifiers=[
         'Programming Language :: Python :: 3',

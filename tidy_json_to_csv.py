@@ -4,6 +4,7 @@ import csv
 import re
 import ijson
 import queue
+import sys
 import threading
 
 
@@ -170,3 +171,23 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536):
 
         for t, q in open_csv_qs.values():
             t.join()
+
+
+def main():
+    def json_bytes_from_stdin():
+        while True:
+            chunk = sys.stdin.buffer.read(65536)
+            if not chunk:
+                break
+            yield chunk
+
+    def save_csv_bytes(path, chunks):
+        with open(f'{path}.csv', 'wb') as f:
+            for chunk in chunks:
+                f.write(chunk)
+
+    to_csvs(json_bytes_from_stdin(), save_csv_bytes)
+
+
+if __name__ == '__main__':
+    main()
