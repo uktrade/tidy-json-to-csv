@@ -132,7 +132,9 @@ to_csvs(json_bytes(), save_csv_bytes, null='#NA', output_chunk_size=65536)
 ```python
 import io
 import queue
+
 import pandas as pd
+from tidy_json_to_csv import to_csvs
 
 def json_to_pandas(json_filename):
     q = queue.Queue()
