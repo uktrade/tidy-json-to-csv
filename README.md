@@ -7,42 +7,6 @@ Denormalised input JSON is assumed, and the output is normalised. If a nested ob
 Although _mostly_ streaming, to support denormalised input JSON and to avoid repeating the same rows in normalised CSVs, an internal record of output IDs is maintained during processing.
 
 
-## Installation
-
-```bash
-pip install tidy-json-to-csv
-```
-
-
-## Usage: Command line
-
-```bash
-cat songs.json | tidy_json_to_csv
-```
-
-
-## Usage: Python
-
-```python
-from tidy_json_to_csv import to_csvs
-
-# A save function, called by to_csvs for each CSV file to be generated.
-# Will be run in a separate thread, started by to_csvs
-def save_csv_bytes(path, chunks):
-    with open(f'{path}.csv', 'wb') as f:
-        for chunk in chunks:
-            f.write(chunk)
-
-def json_bytes():
-    with open(f'file.json', 'rb') as f:
-        chunk = f.read(65536)
-        if chunk:
-            yield chunk
-
-to_csvs(json_bytes(), save_csv_bytes, null='#NA', output_chunk_size=65536)
-```
-
-
 ## Example input and output
 
 The JSON
@@ -119,4 +83,96 @@ maps to four files:
 "1","musicals"
 "2","television-shows"
 "3","films"
+```
+
+
+## Installation
+
+```bash
+pip install tidy-json-to-csv
+```
+
+
+## Usage: Convert JSON to multiple CSV files (Command line)
+
+```bash
+cat songs.json | tidy_json_to_csv
+```
+
+
+## Usage: Convert JSON to multiple CSV files (Python)
+
+```python
+from tidy_json_to_csv import to_csvs
+
+# A save function, called by to_csvs for each CSV file to be generated.
+# Will be run in a separate thread, started by to_csvs
+def save_csv_bytes(path, chunks):
+    with open(f'{path}.csv', 'wb') as f:
+        for chunk in chunks:
+            f.write(chunk)
+
+def json_bytes():
+    with open(f'file.json', 'rb') as f:
+        chunk = f.read(65536)
+        if chunk:
+            yield chunk
+
+to_csvs(json_bytes(), save_csv_bytes, null='#NA', output_chunk_size=65536)
+```
+
+
+## Usage: Convert JSON to multiple Pandas dataframes (Python)
+
+```python
+import io
+import queue
+import pandas as pd
+
+def json_to_pandas(json_filename):
+    q = queue.Queue()
+
+    class StreamedIterable(io.RawIOBase):
+        def __init__(self, iterable):
+            self.iterable = iterable
+            self.remainder = b''
+        def readable(self):
+            return True
+        def readinto(self, b):
+            buffer_size = len(b)
+
+            while len(self.remainder) < buffer_size:
+                try:
+                    self.remainder = self.remainder + next(self.iterable)
+                except StopIteration:
+                    if self.remainder:
+                        break
+                    return 0
+
+            chunk, self.remainder = self.remainder[:buffer_size], self.remainder[buffer_size:]
+            b[:len(chunk)] = chunk
+            return len(chunk)
+
+    def save_csv_bytes(path, chunks):
+        q.put((path, pd.read_csv(io.BufferedReader(StreamedIterable(chunks), buffer_size=65536), na_values=['#NA'])))
+
+    def json_bytes():
+        with open(json_filename, 'rb') as f:
+            chunk = f.read(65536)
+            if chunk:
+                yield chunk
+
+    to_csvs(json_bytes(), save_csv_bytes, null='#NA')
+
+    dfs = {}
+    while not q.empty():
+        path, df = q.get()
+        dfs[path] = df
+
+    return dfs
+
+dfs = json_to_pandas('songs.json')
+for path, df in dfs.items():
+    print(path)
+    print(df)
 ```
