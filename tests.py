@@ -8,8 +8,11 @@ class TestIntegration(unittest.TestCase):
     def test_basic(self):
         total_received = {}
 
-        def json_bytes():
-            yield json_bytes_songs
+        def json_bytes(chunk_size):
+          remaining = json_bytes_songs
+          while remaining:
+              yield remaining[:chunk_size]
+              remaining = remaining[chunk_size:]
 
         def save_csv(path, chunks):
             total_received[path] = []
@@ -17,13 +20,20 @@ class TestIntegration(unittest.TestCase):
                 total_received[path].append(chunk)
 
         for output_chunk_size in range(1, 200):
-          to_csvs(json_bytes(), save_csv, output_chunk_size=output_chunk_size)
-          files = {
-              path: b''.join(contents)
-              for path, contents in total_received.items()
-          }
-          self.assertEqual(files, json_bytes_songs_parsed)
+            to_csvs(json_bytes(50), save_csv, output_chunk_size=output_chunk_size)
+            files = {
+                path: b''.join(contents)
+                for path, contents in total_received.items()
+            }
+            self.assertEqual(files, json_bytes_songs_parsed)
 
+        for input_chunk_size in range(1, 200):
+            to_csvs(json_bytes(input_chunk_size), save_csv, output_chunk_size=50)
+            files = {
+                path: b''.join(contents)
+                for path, contents in total_received.items()
+            }
+            self.assertEqual(files, json_bytes_songs_parsed)
 
 json_bytes_songs = b'''{
   "songs": [
