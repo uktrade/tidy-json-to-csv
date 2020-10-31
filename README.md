@@ -2,10 +2,6 @@
 
 Converts a subset of JSON to a set of tidy CSVs. Supports both streaming processing of input JSON and output of CSV, and so suitable for large files in memory constrained environments.
 
-Denormalised input JSON is assumed, and the output is normalised. If a nested object has an `id` field, it is assumed to be the primary key of a top-level table. All objects that have a nested object or array _must_ have an `id` field that serves as its primary key in the final output. If present, `id` must be the _first_ key in a map. All arrays must be arrays of objects rather than primitives.
-
-Although _mostly_ streaming, to support denormalised input JSON and to avoid repeating the same rows in normalised CSVs, an internal record of output IDs is maintained during processing.
-
 
 ## What problem does this solve?
 
@@ -16,6 +12,13 @@ Most JSON to CSV converters do not result in data suitable for immediate analysi
 - data duplicated in multiple rows / a row's position in the CSV determines its context.
 
 Often these require subsequent manual, and so error-prone, data manipulation. This library aims to do all the conversion up-front, so you end up with a set of [tidy](https://vita.had.co.nz/papers/tidy-data.pdf) tables, which is often a great place from which to start analysis.
+
+
+## Constraints
+
+Denormalised input JSON is assumed, and the output is normalised. If a nested object has an `id` field, it is assumed to be the primary key of a top-level table. All objects that have a nested object or array _must_ have an `id` field that serves as its primary key in the final output. If present, `id` must be the _first_ key in a map. All arrays must be arrays of objects rather than primitives.
+
+Although _mostly_ streaming, to support denormalised input JSON and to avoid repeating the same rows in normalised CSVs, an internal record of output IDs is maintained during processing.
 
 
 ## Example input and output
