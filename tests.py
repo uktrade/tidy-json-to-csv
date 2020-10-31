@@ -16,12 +16,13 @@ class TestIntegration(unittest.TestCase):
             for chunk in chunks:
                 total_received[path].append(chunk)
 
-        to_csvs(json_bytes(), save_csv)
-        files = {
-            path: b''.join(contents)
-            for path, contents in total_received.items()
-        }
-        self.assertEqual(files, json_bytes_songs_parsed)
+        for output_chunk_size in range(1, 200):
+          to_csvs(json_bytes(), save_csv, output_chunk_size=output_chunk_size)
+          files = {
+              path: b''.join(contents)
+              for path, contents in total_received.items()
+          }
+          self.assertEqual(files, json_bytes_songs_parsed)
 
 
 json_bytes_songs = b'''{

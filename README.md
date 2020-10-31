@@ -32,7 +32,7 @@ def json_bytes():
         if chunk:
             yield chunk
 
-to_csvs(json_bytes(), save_csv_bytes, null='#NA')
+to_csvs(json_bytes(), save_csv_bytes, null='#NA', output_chunk_size=65536)
 ```
 
 

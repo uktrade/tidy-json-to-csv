@@ -7,7 +7,7 @@ import queue
 import threading
 
 
-def to_csvs(json_bytes, save_csv_bytes, null='#NA'):
+def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536):
     STOP_SENTINAL = object()
     top_level_saved = defaultdict(set)
     open_maps = {}
@@ -34,12 +34,35 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA'):
                 raise StopIteration()
             return item
 
+    def buffer(chunks):
+        queue = []
+        queue_length = 0
+
+        for chunk in chunks:
+            queue.append(chunk)
+            queue_length += len(chunk)
+
+            while queue_length >= output_chunk_size:
+                to_send_later = b''.join(queue)
+                chunk, to_send_later = \
+                    to_send_later[:output_chunk_size], to_send_later[output_chunk_size:]
+
+                queue = \
+                    [to_send_later] if to_send_later else \
+                    []
+                queue_length = len(to_send_later)
+
+                yield chunk
+
+        if queue_length:
+            yield b''.join(queue)
+
     def save(path, dict_data):
         try:
             _, q = open_csv_qs[path]
         except KeyError:
             q = queue.Queue(maxsize=1)
-            t = threading.Thread(target=save_csv_bytes, args=(path, QueuedIterable(q)))
+            t = threading.Thread(target=save_csv_bytes, args=(path, buffer(QueuedIterable(q))))
             t.start()
             open_csv_qs[path] = (t, q)
             q.put(csv_writer.writerow(dict_data.keys()).encode('utf-8'))
