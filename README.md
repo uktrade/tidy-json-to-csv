@@ -11,7 +11,7 @@ Although _mostly_ streaming, to support denormalised input JSON and to avoid rep
 
 Most JSON to CSV converters don't fully convert to CSV: nested stuctures typically remain as JSON. Before actually performing analysis, more JSON to CSV conversions are required on each field. This library aims to do all the conversions up-front, so you end up with a set of [tidy](https://vita.had.co.nz/papers/tidy-data.pdf) tables.
 
-
+d
 ## Example input and output
 
 The JSON
@@ -127,7 +127,7 @@ to_csvs(json_bytes(), save_csv_bytes, null='#NA', output_chunk_size=65536)
 ```
 
 
-## Usage: Convert JSON to multiple Pandas dataframes (Python)
+## Usage: Convert JSON to multiple Pandas data frames (Python)
 
 ```python
 import io
