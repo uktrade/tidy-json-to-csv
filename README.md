@@ -19,18 +19,18 @@ pip install tidy-json-to-csv
 ```python
 from tidy_json_to_csv import to_csvs
 
-# A save function must be provided since a single JSON file
-# maps to multiple CSVs
+# A save function, called by to_csvs for each CSV file to be generated.
+# Will be run in a separate thread, started by to_csvs
 def save_csv_bytes(path, chunks):
     with open(f'{path}.csv', 'wb') as f:
         for chunk in chunks:
             f.write(chunk)
 
-# Overkill for this example, but shows how a generator can be
-# used to generate the bytes of a large JSON file
 def json_bytes():
     with open(f'file.json', 'rb') as f:
-        yield f.read()
+        chunk = f.read(65536)
+        if chunk:
+            yield chunk
 
 to_csvs(json_bytes(), save_csv_bytes, null='#NA')
 ```
