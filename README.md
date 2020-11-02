@@ -56,7 +56,7 @@ The JSON
 
 maps to four files:
 
-### `songs[*].csv`
+### `songs.csv`
 
 ```csv
 "id","title","artist__name"
@@ -64,7 +64,7 @@ maps to four files:
 "2","I could have danced all night","Doolitle"
 ```
 
-### `songs[*].categories[*].id.csv`
+### `songs__categories__id.csv`
 
 ```csv
 "songs__id","categories__id"
@@ -74,7 +74,7 @@ maps to four files:
 "2","3"
 ```
 
-### `songs[*].comments[*].csv`
+### `songs__comments.csv`
 
 ```csv
 "songs__id","content"
@@ -83,7 +83,7 @@ maps to four files:
 "2","I also could have danced all night"
 ```
 
-### `categories[*].csv`
+### `categories.csv`
 
 ```csv
 "id","name"

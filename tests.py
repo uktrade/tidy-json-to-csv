@@ -70,8 +70,8 @@ json_bytes_songs = b'''{
 }'''
 
 json_bytes_songs_parsed = {
-    'songs[*].categories[*].id': b'"songs__id","categories__id"\r\n"1",1\r\n"1",2\r\n"2",1\r\n"2",3\r\n',
-    'songs[*].comments[*]': b'"songs__id","content"\r\n"1","I love it"\r\n"1","I\'ve heard better"\r\n"2","I also could have danced all night"\r\n',
-    'songs[*]': b'"id","title","artist__name"\r\n"1","Walk through the fire","Slayer"\r\n"2","I could have danced all night","Dolittle"\r\n',
-    'categories[*]': b'"id","name"\r\n1,"musicals"\r\n2,"television-shows"\r\n3,"films"\r\n',
+    'songs__categories__id': b'"songs__id","categories__id"\r\n"1",1\r\n"1",2\r\n"2",1\r\n"2",3\r\n',
+    'songs__comments': b'"songs__id","content"\r\n"1","I love it"\r\n"1","I\'ve heard better"\r\n"2","I also could have danced all night"\r\n',
+    'songs': b'"id","title","artist__name"\r\n"1","Walk through the fire","Slayer"\r\n"2","I could have danced all night","Dolittle"\r\n',
+    'categories': b'"id","name"\r\n1,"musicals"\r\n2,"television-shows"\r\n3,"films"\r\n',
 }

@@ -71,7 +71,7 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536):
         q.put(csv_writer.writerow(dict_data.values()).encode('utf-8'))
 
     def to_path(prefix):
-        return re.sub(r'([^.]+)\.item', r'\1[*]', prefix)
+        return re.sub(r'([^.]+)\.item\.?', r'\1__', prefix).rstrip('_')
 
     def handle_start_map(prefix, value):
         open_maps[prefix] = {}
@@ -97,7 +97,7 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536):
 
         # ... and only save these for nested top level
         if not is_sub_object and is_top_level and len(parent_ids) > 1:
-            save(to_path(prefix) + '.id', parent_id_dict)
+            save(to_path(prefix) + '__id', parent_id_dict)
 
         # ... but if _not_ top level (i.e. no ID), save the IDs and other data
         if not is_sub_object and not is_top_level and len(parent_ids):
@@ -105,7 +105,7 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536):
 
         # ... and if top level, but not yet saved it, save it
         if not is_sub_object and is_top_level and open_maps[prefix]['id'] not in top_level_saved[key]:
-            save(f'{key}[*]', open_maps[prefix])
+            save(f'{key}', open_maps[prefix])
             top_level_saved[key].add(open_maps[prefix]['id'])
 
         # We're going to be moving up a level, so no need for last ID
