@@ -8,7 +8,7 @@ def long_description():
 
 setuptools.setup(
     name='tidy-json-to-csv',
-    version='0.0.11',
+    version='0.0.12',
     author='Department for International Trade',
     author_email='webops@digital.trade.gov.uk',
     description='Convert JSON to a set of tidy CSV files',
