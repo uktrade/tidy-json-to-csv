@@ -1,14 +1,14 @@
 from collections import defaultdict
 import codecs
+import concurrent.futures
 import csv
 import re
 import ijson
 import queue
 import sys
-import threading
 
 
-def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536):
+def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536, save_chunk_timeout=5, max_files=1024):
     STOP_SENTINAL = object()
     top_level_saved = defaultdict(set)
     open_maps = {}
@@ -58,25 +58,27 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536):
         if queue_length:
             yield b''.join(queue)
 
-    def save(path, dict_data):
+    def save(executor, path, dict_data):
         try:
-            _, q = open_csv_qs[path]
+            f, q = open_csv_qs[path]
         except KeyError:
-            q = queue.Queue(maxsize=1)
-            t = threading.Thread(target=save_csv_bytes, args=(path, buffer(QueuedIterable(q))))
-            t.start()
-            open_csv_qs[path] = (t, q)
-            q.put(csv_writer.writerow(dict_data.keys()).encode('utf-8'))
+            if len(open_csv_qs) >= max_files:
+                raise Exception('Too many open files')
 
-        q.put(csv_writer.writerow(dict_data.values()).encode('utf-8'))
+            q = queue.Queue(maxsize=1)
+            f = executor.submit(save_csv_bytes, path, buffer(QueuedIterable(q)))
+            open_csv_qs[path] = (f, q)
+            q.put(csv_writer.writerow(dict_data.keys()).encode('utf-8'), timeout=save_chunk_timeout)
+
+        q.put(csv_writer.writerow(dict_data.values()).encode('utf-8'), timeout=save_chunk_timeout)
 
     def to_path(prefix):
         return re.sub(r'([^.]+)\.item\.?', r'\1__', prefix).rstrip('_')
 
-    def handle_start_map(prefix, value):
+    def handle_start_map(executor, prefix, value):
         open_maps[prefix] = {}
 
-    def handle_end_map(prefix, value):
+    def handle_end_map(executor, prefix, value):
         key = prefix.rpartition('.item')[0].rpartition('.')[2]
         is_top_level = 'id' in open_maps[prefix]
         is_sub_object = not prefix.endswith('.item')
@@ -97,15 +99,15 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536):
 
         # ... and only save these for nested top level
         if not is_sub_object and is_top_level and len(parent_ids) > 1:
-            save(to_path(prefix) + '__id', parent_id_dict)
+            save(executor, to_path(prefix) + '__id', parent_id_dict)
 
         # ... but if _not_ top level (i.e. no ID), save the IDs and other data
         if not is_sub_object and not is_top_level and len(parent_ids):
-            save(to_path(prefix), {**parent_id_dict, **open_maps[prefix]})
+            save(executor, to_path(prefix), {**parent_id_dict, **open_maps[prefix]})
 
         # ... and if top level, but not yet saved it, save it
         if not is_sub_object and is_top_level and open_maps[prefix]['id'] not in top_level_saved[key]:
-            save(f'{key}', open_maps[prefix])
+            save(executor, f'{key}', open_maps[prefix])
             top_level_saved[key].add(open_maps[prefix]['id'])
 
         # We're going to be moving up a level, so no need for last ID
@@ -114,24 +116,24 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536):
 
         del open_maps[prefix]
 
-    def handle_map_key(prefix, value):
+    def handle_map_key(executor, prefix, value):
         pass
 
-    def handle_start_array(prefix, value):
+    def handle_start_array(executor, prefix, value):
         pass
 
-    def handle_end_array(prefix, value):
+    def handle_end_array(executor, prefix, value):
         pass
 
-    def handle_null(prefix, _):
+    def handle_null(executor, prefix, _):
         parent, _, key = prefix.rpartition('.')
         open_maps[parent][key] = null
 
-    def handle_boolean(prefix, value):
+    def handle_boolean(executor, prefix, value):
         parent, _, key = prefix.rpartition('.')
         open_maps[parent][key] = value
 
-    def handle_number(prefix, value):
+    def handle_number(executor, prefix, value):
         parent, _, key = prefix.rpartition('.')
         open_maps[parent][key] = value
 
@@ -139,7 +141,7 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536):
             parent_key = prefix.rpartition('.item.')[0].rpartition('.item.')[2]
             parent_ids.append((parent_key, value))
 
-    def handle_string(prefix, value):
+    def handle_string(executor, prefix, value):
         parent, _, key = prefix.rpartition('.')
         open_maps[parent][key] = value
 
@@ -149,29 +151,34 @@ def to_csvs(json_bytes, save_csv_bytes, null='#NA', output_chunk_size=65536):
 
     handlers = locals()
 
-    def process(events):
+    def process(executor, events):
         for prefix, event, value in events:
-            handlers[f'handle_{event}'](prefix, value)
+            handlers[f'handle_{event}'](executor, prefix, value)
 
-    try:
-        events = ijson.sendable_list()
-        coro = ijson.parse_coro(events)
-        for chunk in json_bytes:
-            coro.send(chunk)
-            process(events)
-            del events[:]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_files) as executor:
+        try:
+            events = ijson.sendable_list()
+            coro = ijson.parse_coro(events)
+            for chunk in json_bytes:
+                coro.send(chunk)
+                process(executor, events)
+                del events[:]
 
-        coro.close()
-        process(events)
+            coro.close()
+            process(executor, events)
 
-    # Close all open CSVs
-    finally:
-        for _, q in open_csv_qs.values():
-            q.put(STOP_SENTINAL)
+        # Close all open CSVs
+        finally:
+            for _, q in open_csv_qs.values():
+                try:
+                    q.put(STOP_SENTINAL, timeout=save_chunk_timeout)
+                except:
+                    pass
 
-        for t, _ in open_csv_qs.values():
-            t.join()
-
+            for f, _ in open_csv_qs.values():
+                exception = f.exception(timeout=save_chunk_timeout)
+                if exception:
+                    raise exception
 
 def main():
     def json_bytes_from_stdin():
